@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;400;700;800;900&display=swap" rel="stylesheet">
+  <title>تفاصيل بطاقة السائق</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* نفس التنسيق تمامًا كما أرسلته */
+    body {
+      background-color: #F8FCF9;
+      display: flex;
+      align-items: top;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+    }
+    .container {
+      width: 60%;
+      max-width: 1800px;
+      border-radius: 12px;
+      text-align: right;
+      margin: auto;
+    }
+    h2 {
+      padding: 0;
+      margin: 0;
+      margin-top: 20px;
+      font-size: 23px;
+      font-weight: 400;
+      color: #30758f;
+      text-align: right;
+    }
+    h3 {
+      font-size: 20px;
+      font-weight: bold;
+      color: #39758f;
+      text-align: right;
+    }
+    .details {
+      width: 100%;
+      background: white;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .details p {
+      margin: 8px 0;
+      font-size: 16px;
+      color: #444;
+    }
+    .info-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .info-box {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .info-box p {
+      margin: 4px 0;
+    }
+    #detaailstext {
+      font-weight: bold;
+      color: #222;
+    }
+    .card-type {
+      margin-top: 16px;
+    }
+    .button-container {
+      width: 100%;
+    }
+    button {
+      margin-top: 20px;
+      margin-bottom: 70px;
+      width: 110%;
+      padding: 8px 0;
+      border: 2px solid #3975ff;
+      background: none;
+      color: #3975ff;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #39758f;
+      color: white;
+    }
+    @media (min-width: 768px) {
+      .container {
+        width: 80%;
+        max-width: 1800px;
+        border-radius: 12px;
+        text-align: right;
+        margin: auto;
+      }
+      .info-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .info-box {
+        width: auto;
+      }
+      .button-container {
+        width: 20%;
+        padding-right: 85%;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>تفاصيل بطاقة السائق</h2>
+    <div class="details">
+      <h3>بطاقة السائق</h3>
+      <div class="info-group">
+        <div class="info-box">
+          <p id="detaailstext">رقم البطاقة:</p><p id="card_number"></p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">هوية السائق:</p><p id="driver_id"></p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">الاسم الأول:</p><p id="first_name"></p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">اسم العائلة:</p><p id="last_name"></p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">تاريخ إصدار البطاقة:</p><p id="issue_date"></p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">تاريخ انتهاء البطاقة:</p><p id="expiry_date"></p>
+        </div>
+      </div>
+      <div class="card-type">
+        <p><span id="detaailstext">نوع البطاقة:</span></p>
+        <p id="card_type"></p>
+      </div>
+    </div>
+    <div class="button-container">
+      <button onclick="window.history.back()">رجوع</button>
+    </div>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://vhmwdfshqrwasfopqatt.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobXdkZnNocXJ3YXNmb3BxYXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MzYzMTIsImV4cCI6MjA2NjIxMjMxMn0.PU2A9MBGplvnvb7skliZc1BjhzzFFm8CmdUjAi9k6Fc"
+    );
+
+    async function loadData() {
+      const params = new URLSearchParams(window.location.search);
+      const cardNumber = params.get("card");
+      if (!cardNumber) return;
+
+      const { data, error } = await supabase
+        .from("cart")
+        .select("*")
+        .eq("card_number", cardNumber)
+        .single();
+
+      if (error || !data) {
+        alert("لم يتم العثور على البطاقة");
+        return;
+      }
+
+      document.getElementById("card_number").textContent = data.card_number;
+      document.getElementById("driver_id").textContent = data.driver_id;
+      document.getElementById("first_name").textContent = data.first_name;
+      document.getElementById("last_name").textContent = data.last_name;
+      document.getElementById("issue_date").textContent = data.issue_date;
+      document.getElementById("expiry_date").textContent = data.expiry_date;
+      document.getElementById("card_type").textContent = data.card_type;
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
