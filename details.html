@@ -1,11 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;400;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <title>تفاصيل بطاقة السائق</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       background-color: #F8FCF9;
@@ -24,6 +25,8 @@
       margin: auto;
     }
     h2 {
+      padding: 0;
+      margin: 0;
       margin-top: 20px;
       font-size: 23px;
       font-weight: 400;
@@ -92,6 +95,10 @@
     @media (min-width: 768px) {
       .container {
         width: 80%;
+        max-width: 1800px;
+        border-radius: 12px;
+        text-align: right;
+        margin: auto;
       }
       .info-group {
         display: grid;
@@ -117,38 +124,20 @@
     <div class="details">
       <h3>بطاقة السائق</h3>
       <div class="info-group">
-        <div class="info-box">
-          <p id="detaailstext">رقم البطاقة:</p>
-          <p id="cardNumber">...</p>
-        </div>
-        <div class="info-box">
-          <p id="detaailstext">هوية السائق:</p>
-          <p id="driverId">...</p>
-        </div>
-        <div class="info-box">
-          <p id="detaailstext">الاسم الأول:</p>
-          <p id="firstName">...</p>
-        </div>
-        <div class="info-box">
-          <p id="detaailstext">اسم العائلة:</p>
-          <p id="lastName">...</p>
-        </div>
-        <div class="info-box">
-          <p id="detaailstext">تاريخ إصدار البطاقة:</p>
-          <p id="issueDate">...</p>
-        </div>
-        <div class="info-box">
-          <p id="detaailstext">تاريخ انتهاء البطاقة:</p>
-          <p id="expiryDate">...</p>
-        </div>
+        <div class="info-box"><p id="detaailstext">رقم البطاقة:</p><p id="card_number"></p></div>
+        <div class="info-box"><p id="detaailstext">هوية السائق:</p><p id="driver_id"></p></div>
+        <div class="info-box"><p id="detaailstext">الاسم الأول:</p><p id="first_name"></p></div>
+        <div class="info-box"><p id="detaailstext">اسم العائلة:</p><p id="last_name"></p></div>
+        <div class="info-box"><p id="detaailstext">تاريخ إصدار البطاقة:</p><p id="issue_date"></p></div>
+        <div class="info-box"><p id="detaailstext">تاريخ انتهاء البطاقة:</p><p id="expiry_date"></p></div>
       </div>
       <div class="card-type">
         <p><span id="detaailstext">نوع البطاقة:</span></p>
-        <p id="cardType">...</p>
+        <p id="card_type"></p>
       </div>
     </div>
     <div class="button-container">
-      <button onclick="window.location.href='https://abufahdy.github.io/naql.sa/'">رجوع</button>
+      <button onclick="window.history.back()">رجوع</button>
     </div>
   </div>
 
@@ -157,27 +146,24 @@
       "https://vhmwdfshqrwasfopqatt.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobXdkZnNocXJ3YXNmb3BxYXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MzYzMTIsImV4cCI6MjA2NjIxMjMxMn0.PU2A9MBGplvnvb7skliZc1BjhzzFFm8CmdUjAi9k6Fc"
     );
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const cardNumber = urlParams.get("card");
-
-    async function fetchCard() {
+    async function loadData() {
+      const params = new URLSearchParams(window.location.search);
+      const cardNumber = params.get("card");
+      if (!cardNumber) return;
       const { data, error } = await supabase.from("cart").select("*").eq("card_number", cardNumber).single();
       if (error || !data) {
         alert("لم يتم العثور على البطاقة");
         return;
       }
-      document.getElementById("cardNumber").textContent = data.card_number;
-      document.getElementById("driverId").textContent = data.driver_id;
-      document.getElementById("firstName").textContent = data.first_name;
-      document.getElementById("lastName").textContent = data.last_name;
-      document.getElementById("issueDate").textContent = data.issue_date;
-      document.getElementById("expiryDate").textContent = data.expiry_date;
-      document.getElementById("cardType").textContent = data.card_type;
+      document.getElementById("card_number").textContent = data.card_number;
+      document.getElementById("driver_id").textContent = data.driver_id;
+      document.getElementById("first_name").textContent = data.first_name;
+      document.getElementById("last_name").textContent = data.last_name;
+      document.getElementById("issue_date").textContent = data.issue_date;
+      document.getElementById("expiry_date").textContent = data.expiry_date;
+      document.getElementById("card_type").textContent = data.card_type;
     }
-
-    fetchCard();
+    loadData();
   </script>
 </body>
 </html>
-
