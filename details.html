@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;400;700;800;900&display=swap" rel="stylesheet">
-  <title>تفاصيل بطاقة السائق</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;400;700;800;900&amp;display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>تفاصيل بطاقة السائق</title>
   <style>
     body {
       background-color: #F8FCF9;
@@ -124,37 +123,64 @@
     <div class="details">
       <h3>بطاقة السائق</h3>
       <div class="info-group">
-        <div class="info-box"><p id="detaailstext">رقم البطاقة:</p><p id="card_number"></p></div>
-        <div class="info-box"><p id="detaailstext">هوية السائق:</p><p id="driver_id"></p></div>
-        <div class="info-box"><p id="detaailstext">الاسم الأول:</p><p id="first_name"></p></div>
-        <div class="info-box"><p id="detaailstext">اسم العائلة:</p><p id="last_name"></p></div>
-        <div class="info-box"><p id="detaailstext">تاريخ إصدار البطاقة:</p><p id="issue_date"></p></div>
-        <div class="info-box"><p id="detaailstext">تاريخ انتهاء البطاقة:</p><p id="expiry_date"></p></div>
+        <div class="info-box">
+          <p id="detaailstext">رقم البطاقة:</p>
+          <p id="card_number">...</p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">هوية السائق:</p>
+          <p id="driver_id">...</p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">الاسم الأول:</p>
+          <p id="first_name">...</p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">اسم العائلة:</p>
+          <p id="last_name">...</p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">تاريخ إصدار البطاقة:</p>
+          <p id="issue_date">...</p>
+        </div>
+        <div class="info-box">
+          <p id="detaailstext">تاريخ انتهاء البطاقة:</p>
+          <p id="expiry_date">...</p>
+        </div>
       </div>
       <div class="card-type">
         <p><span id="detaailstext">نوع البطاقة:</span></p>
-        <p id="card_type"></p>
+        <p id="card_type">...</p>
       </div>
     </div>
     <div class="button-container">
-      <button onclick="window.history.back()">رجوع</button>
+      <button onclick="window.location.href='https://google.com'">رجوع</button>
     </div>
   </div>
 
   <script>
     const supabase = window.supabase.createClient(
       "https://vhmwdfshqrwasfopqatt.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobXdkZnNocXJ3YXNmb3BxYXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MzYzMTIsImV4cCI6MjA2NjIxMjMxMn0.PU2A9MBGplvnvb7skliZc1BjhzzFFm8CmdUjAi9k6Fc"
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     );
-    async function loadData() {
-      const params = new URLSearchParams(window.location.search);
-      const cardNumber = params.get("card");
-      if (!cardNumber) return;
-      const { data, error } = await supabase.from("cart").select("*").eq("card_number", cardNumber).single();
+
+    const params = new URLSearchParams(window.location.search);
+    const cardNumber = params.get("card");
+
+    async function loadCard() {
+      if (!cardNumber) return alert("لم يتم العثور على البطاقة");
+
+      const { data, error } = await supabase
+        .from("cart")
+        .select("*")
+        .eq("card_number", cardNumber)
+        .single();
+
       if (error || !data) {
         alert("لم يتم العثور على البطاقة");
         return;
       }
+
       document.getElementById("card_number").textContent = data.card_number;
       document.getElementById("driver_id").textContent = data.driver_id;
       document.getElementById("first_name").textContent = data.first_name;
@@ -163,7 +189,8 @@
       document.getElementById("expiry_date").textContent = data.expiry_date;
       document.getElementById("card_type").textContent = data.card_type;
     }
-    loadData();
+
+    loadCard();
   </script>
 </body>
 </html>
