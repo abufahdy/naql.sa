@@ -1,33 +1,57 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إصدار بطاقة سائق</title>
+  <meta charset="UTF-8">
+  <title>إصدار بطاقة السائق</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
-    body { font-family: 'Cairo', sans-serif; text-align: center; margin: 40px; }
-    input, select, button { margin: 10px; padding: 10px; font-size: 16px; }
-    canvas { margin-top: 20px; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f3f8fc;
+      padding: 20px;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #qrcode {
+      margin-top: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+  <form id="cardForm">
+    <h2>إصدار بطاقة السائق</h2>
+    <input type="text" id="card_number" placeholder="رقم البطاقة" required>
+    <input type="text" id="driver_id" placeholder="هوية السائق" required>
+    <input type="text" id="first_name" placeholder="الاسم الأول" required>
+    <input type="text" id="last_name" placeholder="اسم العائلة" required>
+    <select id="card_type" required>
+      <option value="">اختر نوع البطاقة</option>
+      <option>نقل البضائع على الحساب الخاص</option>
+      <option>نقل الركاب</option>
+    </select>
+    <button type="submit">إصدار البطاقة</button>
+  </form>
 
-  <h2>إصدار بطاقة سائق</h2>
-
-  <input id="driver_id" placeholder="هوية السائق" /><br>
-  <input id="first_name" placeholder="الاسم الأول" /><br>
-  <input id="last_name" placeholder="اسم العائلة" /><br>
-  <select id="card_type">
-    <option>نقل البضائع على الحساب الخاص</option>
-    <option>نقل الركاب</option>
-  </select><br>
-
-  <button onclick="issueCard()">إصدار البطاقة</button>
-
-  <p id="message" style="color: green;"></p>
-  <canvas id="qrcode"></canvas>
+  <div id="qrcode"></div>
 
   <script>
     const supabase = window.supabase.createClient(
@@ -35,49 +59,41 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobXdkZnNocXJ3YXNmb3BxYXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MzYzMTIsImV4cCI6MjA2NjIxMjMxMn0.PU2A9MBGplvnvb7skliZc1BjhzzFFm8CmdUjAi9k6Fc"
     );
 
-    async function issueCard() {
-      const driver_id = document.getElementById('driver_id').value.trim();
-      const first_name = document.getElementById('first_name').value.trim();
-      const last_name = document.getElementById('last_name').value.trim();
-      const card_type = document.getElementById('card_type').value;
+    document.getElementById("cardForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const card_number = document.getElementById("card_number").value;
+      const driver_id = document.getElementById("driver_id").value;
+      const first_name = document.getElementById("first_name").value;
+      const last_name = document.getElementById("last_name").value;
+      const card_type = document.getElementById("card_type").value;
 
-      if (!driver_id || !first_name || !last_name || !card_type) {
-        alert("يرجى تعبئة جميع الحقول");
-        return;
-      }
+      const issue_date = new Date().toISOString().split('T')[0];
+      const expiry_date = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0];
 
-      const card_number = Math.floor(100000000 + Math.random() * 900000000);
-      const today = new Date().toISOString().split('T')[0];
-      const nextYear = new Date();
-      nextYear.setFullYear(nextYear.getFullYear() + 1);
-      const expiry = nextYear.toISOString().split('T')[0];
-
-      const { error } = await supabase.from('cart').insert([{
-        card_number,
-        driver_id,
-        first_name,
-        last_name,
-        issue_date: today,
-        expiry_date: expiry,
-        card_type
-      }]);
+      const { data, error } = await supabase.from("cart").insert([
+        {
+          card_number,
+          driver_id,
+          first_name,
+          last_name,
+          card_type,
+          issue_date,
+          expiry_date
+        }
+      ]);
 
       if (error) {
-        document.getElementById('message').style.color = "red";
-        document.getElementById('message').textContent = "حدث خطأ: " + error.message;
-        console.error("Supabase error:", error);
+        alert("حدث خطأ: " + error.message);
         return;
       }
 
-      document.getElementById('message').style.color = "green";
-      document.getElementById('message').textContent = "تم إصدار البطاقة بنجاح ✅";
-
-      const qrLink = `https://ahmedcards.infinityfreeapp.com/card/?card=${card_number}`;
-      QRCode.toCanvas(document.getElementById('qrcode'), qrLink, function (err) {
-        if (err) console.error("QR error:", err);
+      const link = `https://abufahdy.github.io/naql.sa/card/?card=${card_number}`;
+      QRCode.toCanvas(document.createElement("canvas"), link, function (err, canvas) {
+        if (err) console.error(err);
+        document.getElementById("qrcode").innerHTML = "<h3>تم إنشاء الباركود:</h3>";
+        document.getElementById("qrcode").appendChild(canvas);
       });
-    }
+    });
   </script>
-
 </body>
 </html>
