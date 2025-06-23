@@ -3,34 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إصدار بطاقة سائق</title>
+  <title>إصدار بطاقة السائق</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Cairo', sans-serif;
+      background: #f4f4f4;
       padding: 20px;
-      direction: rtl;
     }
     input, select, button {
-      display: block;
-      margin-bottom: 12px;
-      padding: 8px;
-      font-size: 16px;
       width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
     }
     #qrcode {
       margin-top: 20px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h2>إصدار بطاقة سائق</h2>
+  <h2>إصدار بطاقة السائق</h2>
 
-  <input type="text" id="driverId" placeholder="هوية السائق" required />
-  <input type="text" id="firstName" placeholder="الاسم الأول" required />
-  <input type="text" id="lastName" placeholder="اسم العائلة" required />
-  <select id="cardType">
+  <input type="text" id="card_number" placeholder="رقم البطاقة" required />
+  <input type="text" id="driver_id" placeholder="هوية السائق" required />
+  <input type="text" id="first_name" placeholder="الاسم الأول" required />
+  <input type="text" id="last_name" placeholder="اسم العائلة" required />
+  <select id="card_type">
+    <option value="">اختر نوع البطاقة</option>
     <option value="نقل البضائع على الحساب الخاص">نقل البضائع على الحساب الخاص</option>
     <option value="نقل الركاب">نقل الركاب</option>
   </select>
@@ -39,42 +41,55 @@
 
   <div id="qrcode"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
     const supabase = window.supabase.createClient(
-      "https://vhmwdfshqrwasfopqatt.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobXdkZnNocXJ3YXNmb3BxYXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MzYzMTIsImV4cCI6MjA2NjIxMjMxMn0.PU2A9MBGplvnvb7skliZc1BjhzzFFm8CmdUjAi9k6Fc"
+      "https://psvihfbhqlalgojgcsjk.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzdmloZmJocWxhbGdvamdjc2prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3MDQyNjksImV4cCI6MjA2NjI4MDI2OX0.g0M7exLRAPkpZR__K5ErtbJ7lpIXhz3jkxRugCalHZk"
     );
 
-    function generateCardNumber() {
-      return 'CARD' + Date.now(); // مثال: CARD1719162090000
-    }
-
     async function issueCard() {
-      const card_number = generateCardNumber();
-      const driver_id = document.getElementById("driverId").value.trim();
-      const first_name = document.getElementById("firstName").value.trim();
-      const last_name = document.getElementById("lastName").value.trim();
-      const card_type = document.getElementById("cardType").value;
+      const card_number = document.getElementById("card_number").value.trim();
+      const driver_id = document.getElementById("driver_id").value.trim();
+      const first_name = document.getElementById("first_name").value.trim();
+      const last_name = document.getElementById("last_name").value.trim();
+      const card_type = document.getElementById("card_type").value;
       const issue_date = new Date().toISOString().split("T")[0];
-      const expiry_date = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0];
+      const expiry_date = new Date();
+      expiry_date.setFullYear(expiry_date.getFullYear() + 1);
+      const expiry_date_str = expiry_date.toISOString().split("T")[0];
 
-      const { data, error } = await supabase.from("cart").insert([{
-        card_number,
-        driver_id,
-        first_name,
-        last_name,
-        card_type,
-        issue_date,
-        expiry_date
-      }]);
-
-      if (error) {
-        alert("حدث خطأ أثناء حفظ البيانات");
+      if (!card_number || !driver_id || !first_name || !last_name || !card_type) {
+        alert("يرجى تعبئة جميع الحقول");
         return;
       }
 
-      const cardLink = `https://abufahdy.github.io/naql.sa/details.html?card=${encodeURIComponent(card_number)}`;
-      QRCode.toCanvas(document.getElementById("qrcode"), cardLink, { width: 200 });
+      const { error } = await supabase.from("cards").insert([
+        {
+          card_number,
+          driver_id,
+          first_name,
+          last_name,
+          card_type,
+          issue_date,
+          expiry_date: expiry_date_str
+        }
+      ]);
+
+      if (error) {
+        alert("حدث خطأ: " + error.message);
+        return;
+      }
+
+      const link = `https://abufahdy.github.io/naql.sa/details.html?card=${encodeURIComponent(card_number)}`;
+      QRCode.toCanvas(document.createElement("canvas"), link, function (err, canvas) {
+        if (err) {
+          alert("فشل في توليد الباركود");
+          return;
+        }
+        document.getElementById("qrcode").innerHTML = "<p>تم إصدار البطاقة، امسح الباركود:</p>";
+        document.getElementById("qrcode").appendChild(canvas);
+      });
     }
   </script>
 </body>
