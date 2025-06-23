@@ -39,6 +39,7 @@
 <body>
   <form id="cardForm">
     <h2>إصدار بطاقة السائق</h2>
+    <input type="text" id="card_number" placeholder="رقم البطاقة" required>
     <input type="text" id="driver_id" placeholder="هوية السائق" required>
     <input type="text" id="first_name" placeholder="الاسم الأول" required>
     <input type="text" id="last_name" placeholder="اسم العائلة" required>
@@ -55,13 +56,12 @@
   <script>
     const supabase = window.supabase.createClient(
       "https://vhmwdfshqrwasfopqatt.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobXdkZnNocXJ3YXNmb3BxYXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MzYzMTIsImV4cCI6MjA2NjIxMjMxMn0.PU2A9MBGplvnvb7skliZc1BjhzzFFm8CmdUjAi9k6Fc"
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     );
 
     document.getElementById("cardForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-
-      const card_number = Date.now().toString(); // توليد رقم البطاقة تلقائي
+      const card_number = document.getElementById("card_number").value;
       const driver_id = document.getElementById("driver_id").value;
       const first_name = document.getElementById("first_name").value;
       const last_name = document.getElementById("last_name").value;
@@ -87,7 +87,7 @@
         return;
       }
 
-      const link = `https://abufahdy.github.io/naql.sa/details.html?card=${card_number}`;
+      const link = `https://abufahdy.github.io/naql.sa/details.html?card=${encodeURIComponent(card_number)}`;
       QRCode.toCanvas(document.createElement("canvas"), link, function (err, canvas) {
         if (err) console.error(err);
         document.getElementById("qrcode").innerHTML = "<h3>تم إنشاء الباركود:</h3>";
