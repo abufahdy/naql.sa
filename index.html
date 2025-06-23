@@ -2,16 +2,18 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>إعادة التوجيه...</title>
+  <title>جاري التوجيه...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
-    // التقاط رقم البطاقة من الرابط وتحويله إلى صفحة التفاصيل
+    // نحصل على رقم البطاقة من الرابط
     const params = new URLSearchParams(window.location.search);
     const card = params.get("card");
+
+    // إذا وجد رقم البطاقة نحول المستخدم إلى صفحة العرض
     if (card) {
-      window.location.href = `details.html?card=${card}`;
+      window.location.href = "details.html?card=" + encodeURIComponent(card);
     } else {
-      document.write("رقم البطاقة غير موجود في الرابط.");
+      document.body.innerHTML = "<h3 style='text-align:center; margin-top:50px;'>رقم البطاقة غير موجود.</h3>";
     }
   </script>
 </head>
